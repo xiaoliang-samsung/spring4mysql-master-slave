@@ -53,8 +53,11 @@ public class ReferenceDataRepository {
 			System.out.println("use the VCAP_SERVICE ENV directly");
 			JSONArray jsonArray = null;
 			try {
-				JSONObject rootObj = new JSONObject(
-						System.getenv("VCAP_SERVICES"));
+				 JSONObject rootObj = new JSONObject(
+				 System.getenv("VCAP_SERVICES"));
+//				JSONObject rootObj = new JSONObject(
+//						"{\"mysql-5.1.410\":[{\"name\":\"swctest_115_mysqllvm-ubuntu-ebs_swctest\",\"label\":\"mysql-5.1.410\",\"plan\":\"free\",\"credentials\":[{\"username\":\"scalr\",\"host\":\"ec2-107-20-31-3.compute-1.amazonaws.com\",\"password\":\"TQbOTzWY98e82lWImiQR\",\"user\":\"scalr\",\"hostname\":\"ec2-107-20-31-3.compute-1.amazonaws.com\",\"type\":\"master\",\"port\":3306,\"name\":\"cloudpidb\"},{\"username\":\"scalr\",\"host\":\"ec2-23-22-31-206.compute-1.amazonaws.com\",\"password\":\"TQbOTzWY98e82lWImiQR\",\"user\":\"scalr\",\"hostname\":\"ec2-23-22-31-206.compute-1.amazonaws.com\",\"type\":\"slave\",\"port\":3306,\"name\":\"cloudpidb\"}]}]}");
+
 				JSONArray mysqlArray = rootObj.getJSONArray("mysql-5.1.410");
 				jsonArray = mysqlArray.getJSONObject(0).getJSONArray(
 						"credentials");
