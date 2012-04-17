@@ -1,10 +1,13 @@
 package org.cloudfoundry.samples;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.cloudfoundry.samples.exception.NoServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,9 +32,22 @@ public class MasterSlaveController {
 		logger.info("Welcome " + type + " Database!");
 		referenceRepository = new ReferenceDataRepository();
 		referenceRepository.init(type);
+		checkDB(type);
 		model.addAttribute("dbinfo", referenceRepository.getDbInfo());
 		model.addAttribute("states", referenceRepository.findAll());
 		return "result";
 	}
 
+	public void checkDB(String type) {
+		if (referenceRepository.getJdbcTemplate() == null) {
+			throw new NoServiceException(type);
+		}
+	}
+
+	@ExceptionHandler(NoServiceException.class)
+	public String handleNoServiceException(NoServiceException ex,
+			HttpServletRequest request) {
+		request.setAttribute("error", ex.getMessage());
+		return "exception";
+	}
 }
