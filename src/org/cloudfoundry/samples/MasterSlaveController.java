@@ -1,6 +1,15 @@
 package org.cloudfoundry.samples;
 
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.cloudfoundry.samples.exception.NoServiceException;
 import org.slf4j.Logger;
@@ -36,6 +45,94 @@ public class MasterSlaveController {
 		model.addAttribute("dbinfo", referenceRepository.getDbInfo());
 		model.addAttribute("states", referenceRepository.findAll());
 		return "result";
+	}
+
+	@RequestMapping(value = "/getSession")
+	public void getSession(HttpServletResponse response, HttpSession session) {
+		try {
+			response.setContentType("text/plain");
+			PrintWriter out = response.getWriter();
+
+			out.println(System.getenv("VCAP_APPLICATION"));
+			out.println(session.getAttribute("user") + session.getId());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	@RequestMapping("/env")
+	public void env(HttpServletResponse response) throws IOException {
+		response.setContentType("text/plain");
+		PrintWriter out = response.getWriter();
+		out.println("System Environment:");
+		out.println("System Environment:");
+		for (Map.Entry<String, String> envvar : System.getenv().entrySet()) {
+			out.println(envvar.getKey() + ": " + envvar.getValue());
+		}
+	}
+
+	@RequestMapping(value = "/setSession")
+	public void setSession(HttpServletResponse response, HttpSession session) {
+		session.setAttribute("user", "nate");
+		try {
+			response.setContentType("text/plain");
+			PrintWriter out = response.getWriter();
+			out.println(System.getenv("VCAP_APPLICATION"));
+			out.println("success" + session.getId());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	private static void close(Closeable c) {
+		if (c != null) {
+			try {
+				c.close();
+			} catch (IOException e) {
+				// ignored
+			}
+		}
+	}
+
+	private static String exceCmd(String cmd) {
+		StringBuffer sb = new StringBuffer();
+		Process proc = null;
+		InputStreamReader isr = null;
+		BufferedReader br = null;
+		try {
+			ProcessBuilder pb = new ProcessBuilder(cmd);
+			proc = pb.start();
+			isr = new InputStreamReader(proc.getInputStream());
+
+			br = new BufferedReader(isr);
+
+			String line = null;
+
+			while ((line = br.readLine()) != null)
+				sb.append(line).append("\r\n");
+			proc.waitFor();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally {
+			if (proc != null) {
+				close(br);
+				close(isr);
+				close(proc.getErrorStream());
+				close(proc.getOutputStream());
+				proc.destroy();
+			}
+		}
+		return sb.toString();
+	}
+
+	@RequestMapping(value = "/serviceHandle", method = RequestMethod.POST)
+	public void serviceHandle(Model model, @RequestParam String type) {
+
 	}
 
 	public void checkDB(String type) {
