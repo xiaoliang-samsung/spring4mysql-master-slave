@@ -1,0 +1,15 @@
+url:/cpu
+method:post
+params
+	number:{1-n}      (means theads)
+
+url:/increMemory
+method:post
+params
+ 	number:{1-n}      (means bytes)
+ 	
+
+url:/increDisk
+method:post
+params
+ 	number:{1-n}      (means bytes)
